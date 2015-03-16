@@ -15,28 +15,25 @@
     var es = require('event-stream');
 
     var bases = {
-        app: 'web/',
-        dist: './public/'
+        app: './app/',
+        dist: './dist/'
     };
 
     var vendorPaths = {
         scripts: [
+            "bower_components/jquery/dist/jquery.js",
+            "bower_components/semantic-ui/dist/semantic.js",
             "bower_components/angular/angular.js",
             "bower_components/angular-route/angular-route.js",
             "bower_components/angular-animate/angular-animate.js",
             "bower_components/angular-resource/angular-resource.js",
-            "bower_components/angular-sanitize/angular-sanitize.js",
-            "bower_components/jquery/dist/jquery.js",
-            "bower_components/semantic-ui/build/packaged/javascript/semantic.js"
+            "bower_components/angular-sanitize/angular-sanitize.js"
         ],
         style: [
-            "bower_components/semantic-ui/build/packaged/css/semantic.css"
+            "bower_components/semantic-ui/dist/semantic.css"
         ],
-        images: [
-            "bower_components/semantic-ui/build/packaged/images/*.*"
-        ],
-        fonts: [
-            "bower_components/semantic-ui/build/packaged/fonts/*.*"
+        assets: [
+            "bower_components/semantic-ui/themes/default/assets/**/*.*"
         ]
     };
 
@@ -51,52 +48,49 @@
         return es.concat(
             gulp.src(vendorPaths.scripts)
                 .pipe(concat('vendor.js'))
-                .pipe(gulp.dest('./public/js')),
+                .pipe(gulp.dest(bases.dist + 'js')),
 
             gulp.src(vendorPaths.style)
                 .pipe(concat('vendor.css'))
-                .pipe(gulp.dest('./public/style')),
+                .pipe(gulp.dest(bases.dist + 'style')),
 
-            gulp.src(vendorPaths.images)
-                .pipe(gulp.dest('./public/img')),
-
-            gulp.src(vendorPaths.fonts)
-                .pipe(gulp.dest('./public/fonts'))
+            gulp.src(vendorPaths.assets)
+                .pipe(gulp.dest(bases.dist))
         );
     });
 
     //compile less
     gulp.task('less', ['clean'], function () {
-        gulp.src('./web/less/*.less')
+        gulp.src(bases.app + 'less/*.less')
             .pipe(concat("main.css"))
             .pipe(less())
-            .pipe(gulp.dest('./public/style'));
+            .pipe(gulp.dest(bases.dist + 'style'));
     });
 
     gulp.task("js", ['clean'], function () {
-        return gulp.src('./web/js/*.js')
+        return gulp.src(bases.app + 'js/*.js')
             .pipe(plumber())
             .pipe(concat("app.js"))
             .pipe(gulpif(!args.debug, uglify()))
-            .pipe(gulp.dest("./public/js"));
+            .pipe(gulp.dest(bases.dist + 'js'));
     });
 
     gulp.task("html", ['clean'], function () {
-        return gulp.src('./web/view/*.html')
-            .pipe(gulp.dest("./public/view"));
+        return gulp.src(bases.app + 'view/*.html')
+            .pipe(gulp.dest(bases.dist + 'view'));
     });
 
     gulp.task("img", ['clean'], function () {
-        return gulp.src('./web/img/*.*')
-            .pipe(gulp.dest("./public/img"));
+        return gulp.src(bases.app + 'fonts/*.*')
+            .pipe(gulp.dest(bases.dist));
     });
 
 
     gulp.task("watch", function () {
-        gulp.watch("./web/js", ["js"]);
-        gulp.watch("./web/less", ["less"]);
-        gulp.watch("./web/view", ["html"]);
-        gulp.watch("./web/img", ["img"]);
+        gulp.watch(bases.app + 'js', ["js"]);
+        gulp.watch(bases.app + 'less', ["less"]);
+        gulp.watch(bases.app + 'view', ["html"]);
+        gulp.watch(bases.app + 'img', ["img"]);
     });
 
     gulp.task("build", ["clean", "vendor", "less", "js", "html", "img"]);
